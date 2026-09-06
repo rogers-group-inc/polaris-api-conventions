@@ -36,3 +36,8 @@ skills/polaris-api-conventions/references/*.md   # generated, one per api.html s
 skills/polaris-api-conventions/examples/         # minimal clients (TypeScript, PowerShell)
 scripts/import-api-html.mjs
 ```
+
+## License
+
+Copyright (C) 2026 Rogers Group. Licensed under the GNU Affero General Public License v3.0
+([AGPL-3.0-only](LICENSE)).
