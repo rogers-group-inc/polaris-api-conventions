@@ -6,9 +6,14 @@ automation. It is the plugin form of the developer page Polaris serves at `<pola
 
 ## Use it in another project
 
+Clone it once, then point Claude Code at the clone:
+
 ```
-claude --plugin-dir C:\Users\dmoore\VSCode\polaris-api-conventions
+git clone https://github.com/rogers-group-inc/polaris-api-conventions.git
+claude --plugin-dir <path-to-clone>/polaris-api-conventions
 ```
+
+`git pull` in the clone picks up a new version (check `version` in `.claude-plugin/plugin.json`).
 
 The skill `polaris-api-conventions` then auto-loads whenever a task calls a Polaris server,
 needs a token, quarantines a device, builds a wallboard, or asks what an endpoint returns.
