@@ -8,7 +8,7 @@ Aggregate wallboard/kiosk feeds. All three endpoints follow the **filter-don't-4
 
 _Gate: per-feed: assets/events/alerts read_
 
-The NOC feed bundle. `?feeds=` selects a comma-separated subset of `status, downNodes, downInterfaces, downIpsecTunnels, topCpu, topMemory, slowestResponse, packetLoss, diskUsage, temperature, storageForecast, stalePolls, sitesWithIssues, recentReboots, activeAlerts`; absent = all. Filters: `assetTypes`, `regionTags`, `fortigates` (all CSV), `limit` (≤1000; each feed has its own default cap), `samples` (top-N averaging depth, ≤100, default 10), `includeDependencyDown=1`.
+The NOC feed bundle. `?feeds=` selects a comma-separated subset of `status, downNodes, downInterfaces, downIpsecTunnels, topCpu, topMemory, slowestResponse, packetLoss, diskUsage, temperature, storageForecast, stalePolls, sitesWithIssues, recentReboots, activeAlerts`; absent = all. Filters: `hideAssetTypes` (CSV of the asset types to EXCLUDE — built-in or operator-added; `assetTypes` is the legacy inverse and names the ENABLED built-ins, from which the hidden set is derived as the built-ins it omits — sending both unions them), `regionTags`, `fortigates` (all CSV), `limit` (≤1000; each feed has its own default cap), `samples` (top-N averaging depth, ≤100, default 10), `includeDependencyDown=1`.
 
 Response is a flat map of the requested feeds. Three feeds fan out: `status` → `statusCounts` + `uptimePercent` + `activeAlertCount`; `downNodes` → `downNodes` + `downNodesTotal` (true uncapped count); `activeAlerts` → `activeAlerts` + `activeAlertsTotal`. Feed gates: `recentReboots` needs `events:read`, `activeAlerts` needs `alerts:read`, everything else `assets:read`.
 
@@ -27,4 +27,4 @@ _Gate: per-section: ipBlocks/reservations/assets read_
 
 _Gate: assets:read_
 
-`{ assetTypes, regions, fortigates }` — the values the noc-summary filters accept. Empty arrays (not 403) without `assets:read`.
+`{ assetTypes, regions, fortigates }` — the values the noc-summary filters accept. `assetTypes` is `{ name, label }` entries: every built-in type followed by every operator-added type present in the fleet, registry-labelled. Empty arrays (not 403) without `assets:read`.
