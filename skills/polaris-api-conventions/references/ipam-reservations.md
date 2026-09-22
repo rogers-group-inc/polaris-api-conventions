@@ -18,6 +18,8 @@ Body: `{ subnetId, ipAddress?, hostname, owner?, projectRef?, expiresAt?, notes?
 
 Collision semantics: an existing *active* row at the same address is a `409` — unless it is merely observed presence (`dhcp_lease`, `dns_resolved`, or a lease-backed infra row), which the create supersedes in place. Device-owned rows (`vip`, `interface_ip`) and authoritative types always `409`. A deprecated subnet refuses new reservations.
 
+On a network whose integration pushes DHCP reservations, `notes` becomes the FortiGate entry's description, which FortiOS holds 255 characters of — including the `Polaris/: &hellip; []` wrapper Polaris writes around it. An over-length `notes` (or `hostname`) is a `400` naming the budget and the overage; nothing is truncated. The same applies to `PUT /reservations/:id` when it changes either field. Networks Polaris does not push to have no such limit.
+
 ```bash
 curl -X POST -H "Authorization: Bearer $POLARIS_TOKEN" \
   -H "Content-Type: application/json" \

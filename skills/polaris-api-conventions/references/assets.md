@@ -50,11 +50,21 @@ The device's dependency context: `{ asset, effectiveParents, computedParents, ov
 
 Creating a device and putting it under monitoring is **two calls**: `POST /assets` carries inventory fields only, and the monitoring switch plus its credential wiring live on `PUT /assets/:id`. Credentials themselves are *not* created over the API in the normal flow — an operator saves them once under Server Settings → Credentials and the integration references the stored row by id.
 
+### GET /assets/ip-check
+
+_Gate: assets:read_
+
+Ask, before creating or re-addressing a device, whether an address is already in use. Query: `ip` (required), `excludeAssetId` (the asset being edited, so it is not reported as colliding with itself), and optionally `assetType` and `macAddress` for the incoming device. Returns `{ ip, holders[], wouldConflict, qualifiedBy, canMerge }`: every network-present asset already recording the address (each with `claimCurrent` — a stale record is listed but does not collide), whether saving would raise a Duplicate IP conflict, and whether the caller may merge assets (`assets:fullwrite`). The answer is computed with the same rules the save applies, so a `wouldConflict: true` here is a conflict the write will raise. `400` on an invalid address.
+
+```bash
+curl -H "Authorization: Bearer $POLARIS_TOKEN"   "$POLARIS_URL/api/v1/assets/ip-check?ip=10.20.30.4&assetType=switch"
+```
+
 ### POST /assets
 
 _Gate: assets:write_
 
-Create a device. Body (all optional, but give it at least an address or a hostname): `{ ipAddress?, macAddress?, hostname?, dnsName?, assetTag?, serialNumber?, manufacturer?, model?, assetType?, status?, location?, latitude?/longitude?, department?, assignedTo?, os?, acquiredAt?, warrantyExpiry?, purchaseOrder?, notes?, description?, tags? }`. `assetType` defaults to `other` and `status` to `active`. `201` with the created record.
+Create a device. Body (all optional, but give it at least an address or a hostname): `{ ipAddress?, macAddress?, hostname?, dnsName?, assetTag?, serialNumber?, manufacturer?, model?, assetType?, status?, location?, latitude?/longitude?, department?, assignedTo?, os?, acquiredAt?, warrantyExpiry?, purchaseOrder?, notes?, description?, tags? }`. `assetType` defaults to `other` and `status` to `active`. `201` with the created record, plus `ipConflict`: when the new device's address is already recorded by another network-present asset, Polaris raises a Duplicate IP conflict on the spot (rather than on its ten-minute sweep) and returns it as `{ conflictId, ip, qualifiedBy, members[] }`; otherwise `null`. Ask before writing with `GET /assets/ip-check` below.
 
 **Monitoring fields are not accepted here** — `monitored` and every `*CredentialId` belong to the PUT below. A device created by this endpoint is a manual-source asset: only response time gets a source default (ICMP), so every other stream stays dark until a polling method is chosen for it.
 
@@ -66,7 +76,7 @@ curl -X POST -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: appli
 
 _Gate: assets:write_
 
-Update any field `POST /assets` accepts, plus the monitoring surface: `{ monitored?, monitorCredentialId?, monitorIntervalSec? (5–86400), probeTimeoutMs? (100–60000) }`, the per-stream polling methods `{ responseTimePolling?, cpuMemoryPolling?, temperaturePolling?, interfacesPolling?, lldpPolling?, storagePolling? }` (one of `rest_api, snmp, winrm, ssh, icmp, agent, vcenter, fortimanager, disabled`), and the per-stream credentials `{ responseTimeCredentialId?, cpuMemoryCredentialId?, temperatureCredentialId?, interfacesCredentialId?, lldpCredentialId? }`. `null` clears a slot and falls back to the next settings tier.
+Update any field `POST /assets` accepts, plus the monitoring surface: `{ monitored?, monitorCredentialId?, monitorIntervalSec? (5–86400), probeTimeoutMs? (100–60000) }`, the per-stream polling methods `{ responseTimePolling?, cpuMemoryPolling?, temperaturePolling?, interfacesPolling?, lldpPolling?, storagePolling? }` (one of `rest_api, snmp, winrm, ssh, icmp, agent, vcenter, fortimanager, disabled`), and the per-stream credentials `{ responseTimeCredentialId?, cpuMemoryCredentialId?, temperatureCredentialId?, interfacesCredentialId?, lldpCredentialId? }`. `null` clears a slot and falls back to the next settings tier. When the update *changes* `ipAddress`, the response carries `ipConflict` exactly as `POST /assets` does — the conflict on the new address, or `null` — and a conflict the device just moved off is closed in the same call.
 
 Refusals worth coding against:
 

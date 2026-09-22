@@ -10,6 +10,8 @@ _Gate: subnets:read_
 
 `{ subnets, total, limit, offset }` (default limit 50, max 10000). Filters: `blockId`, `status` (`available` / `reserved` / `deprecated`), `tag`.
 
+Each row carries its address usage: `_count.reservations` — reservations holding an address right now (`active` with an `ipAddress`; released and expired rows and whole-network reservations are not counted); `usableHosts` — addresses the CIDR can hand out, `null` for IPv6 and for any CIDR that cannot be measured; `utilizationPercent` — the first over the second, to one decimal, `null` wherever `usableHosts` is; `totalReservations` — every reservation row on the network whatever its status, which is what a delete removes.
+
 ### GET /subnets/:id
 
 _Gate: subnets:read_
