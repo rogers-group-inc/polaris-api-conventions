@@ -67,6 +67,18 @@ _Gate: subnets:write_
 
 Re-pull one discovered network's addresses from its FortiGate now: `{ lastDiscoveredAt, created, updated, released, skipped }`. `400` for manually-created networks or non-Fortinet integrations.
 
+### GET /subnets/:id/move-targets
+
+_Gate: subnets:read_
+
+Blocks other than the current one whose range contains this network's CIDR: `[{ id, name, cidr, overlaps }]`. `overlaps` is the CIDR of the network in that block that would collide, or `null` when the move is allowed.
+
+### POST /subnets/:id/move
+
+_Gate: subnets:write_
+
+Body `{ blockId }`. Re-parents the network onto another block and returns the updated row; reservations and history stay with it. Ownership-scoped like `PUT`. `400` when the block does not contain the CIDR, the IP version differs, or it is already the network's block; `409` when a network in the destination overlaps.
+
 ### POST /subnets/:id/archive
 
 _Gate: subnets:fullwrite_

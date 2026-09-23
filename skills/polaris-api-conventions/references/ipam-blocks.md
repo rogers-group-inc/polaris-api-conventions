@@ -32,4 +32,4 @@ Body: `{ name?, description?, tags? }`. The CIDR itself is not updatable.
 
 _Gate: ipBlocks:write_
 
-`204` on success; `409` while any subnet in the block holds active reservations.
+`204` on success; `409` while the block contains any network, whatever its status. Move networks out with `POST /subnets/:id/move`, archive or delete them first.
