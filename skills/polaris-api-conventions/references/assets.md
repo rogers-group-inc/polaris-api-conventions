@@ -96,6 +96,12 @@ _Gate: assets:write_
 
 Flip monitoring on many devices at once: `{ ids: [uuid, …], monitored, monitorCredentialId?, monitorIntervalSec?, probeTimeoutMs? }` → `{ updated, errors: [{ id, error }] }`. A mixed selection is normal, so per-id problems (an unknown id, a status that cannot be monitored) are **reported in `errors` with HTTP 200** while the rest of the batch still applies. An unknown `monitorCredentialId` is the exception and fails the whole call with `400` — it applies to every id in the batch, so nothing would be written correctly.
 
+### POST /assets/bulk-tags
+
+_Gate: assets:write_
+
+Add, remove or replace tags on many devices at once: `{ ids: [uuid, …], mode: "add" | "remove" | "replace", tags: [string, …] }` → `{ updated, unchanged, notFound: [uuid, …], tags }`. `add` keeps each device's own tags and appends the new ones; `remove` strips them from the devices that carry them; `replace` leaves each device with exactly `tags`, except that `region:`, `prev-entra:` and `prev-ad:` tags are kept. Unknown ids come back in `notFound` with HTTP 200. An empty `tags` is a `400` for add and remove (replace with none clears), as is adding a `region:` tag that names no map region.
+
 ### DELETE /assets/:id
 
 _Gate: assets:write_
