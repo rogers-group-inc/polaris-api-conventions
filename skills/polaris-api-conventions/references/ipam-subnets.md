@@ -28,12 +28,12 @@ The per-address map: `{ subnet, ips, ipv6, totalIps, page, pageSize }`, each `ip
 
 _Gate: subnets:write_
 
-Body: `{ blockId, cidr, name, purpose?, vlan? (1–4094), tags? }`. `201`; `409` on overlap or duplicate; `400` when the CIDR is invalid, outside the block, or the wrong IP version.
+Body: `{ blockId?, cidr, name, purpose?, vlan? (1–4094), tags? }`. Omit `blockId` and the network is placed in the most specific block whose range contains the CIDR; name one and it is used as given. The response carries `block: { id, name, cidr }` — where it landed. `201`; `409` on overlap or duplicate; `400` when the CIDR is invalid, outside the block, the wrong IP version, or (no `blockId`) inside no block at all.
 
 ```bash
 curl -X POST -H "Authorization: Bearer $POLARIS_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"blockId":"'$BLOCK_ID'","cidr":"10.20.30.0/24","name":"branch-30","vlan":30}' \
+  -d '{"cidr":"10.20.30.0/24","name":"branch-30","vlan":30}' \
   "$POLARIS_URL/api/v1/subnets"
 ```
 
@@ -66,6 +66,12 @@ _Gate: subnets:write (own rows) / fullwrite_
 _Gate: subnets:write_
 
 Re-pull one discovered network's addresses from its FortiGate now: `{ lastDiscoveredAt, created, updated, released, skipped }`. `400` for manually-created networks or non-Fortinet integrations.
+
+### GET /subnets/resolve-block?cidr=
+
+_Gate: subnets:read_
+
+The block a new network with this CIDR would be placed in: `{ block: { id, name, cidr } }`, or `{ block: null }` when no block contains it (or the CIDR is invalid).
 
 ### GET /subnets/:id/move-targets
 
