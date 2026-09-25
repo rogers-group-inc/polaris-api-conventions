@@ -2,7 +2,7 @@
 
 A Claude Code plugin for developers building applications that **consume the Polaris REST
 API** (`/api/v1`): SIEM-driven quarantine, NOC wallboards, inventory consumers, IPAM
-automation. It is the plugin form of the developer page Polaris serves at `<polaris-url>/api`.
+automation, Path Monitor path checks. It is the plugin form of the developer page Polaris serves at `<polaris-url>/api`.
 
 ## Use it in another project
 

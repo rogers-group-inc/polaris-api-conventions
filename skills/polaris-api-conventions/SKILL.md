@@ -1,6 +1,6 @@
 ---
 name: polaris-api-conventions
-description: "Client guide for the Polaris IP-management and monitoring REST API (/api/v1): bearer tokens bound to roles, error envelope and status conventions, filter-don't-403 dashboard/NOC feeds, search scopes, IPAM blocks/networks/reservations, the SIEM quarantine flow, and the events audit tail, with curl examples. Load when a project calls a Polaris server, needs a POLARIS_TOKEN, quarantines a device from a SIEM/EDR, builds a NOC wallboard or inventory sync, or asks what a Polaris endpoint returns."
+description: "Client guide for the Polaris IP-management and monitoring REST API (/api/v1): bearer tokens bound to roles, error envelope and status conventions, filter-don't-403 dashboard/NOC feeds, search scopes, IPAM blocks/networks/reservations, the SIEM quarantine flow, Path Monitor path checks (agent-run HTTP / HTTPS / TCP / ICMP reachability checks, their per-host results, latency history and traceroutes), and the events audit tail, with curl examples. Load when a project calls a Polaris server, needs a POLARIS_TOKEN, quarantines a device from a SIEM/EDR, builds a NOC wallboard or inventory sync, creates or reads path checks (is a service reachable from each site), or asks what a Polaris endpoint returns."
 ---
 
 # Polaris API — client conventions
@@ -68,6 +68,7 @@ block with active reservations), 429 (back off — machine-facing limiters are g
 | IPAM: blocks | [references/ipam-blocks.md](references/ipam-blocks.md) |
 | IPAM: networks (subnets), next-available, bulk allocate, archive, exclusions | [references/ipam-subnets.md](references/ipam-subnets.md) |
 | IPAM: reservations, next-available, push queue, collision semantics | [references/ipam-reservations.md](references/ipam-reservations.md) |
+| Path Monitor: agent-run path checks, their per-host results, history and traceroutes | [references/path-monitor.md](references/path-monitor.md) |
 | the audit tail and how to poll it incrementally | [references/events.md](references/events.md) |
 | a minimal client to start from | [examples/polaris-client.ts](examples/polaris-client.ts), [examples/polaris-client.ps1](examples/polaris-client.ps1) |
 
@@ -83,6 +84,25 @@ DELETE /assets/:id/quarantine                 # release; restores prior status +
 Refusals: 400 for infrastructure types or no known MAC, 409 with no recent sightings, 502
 when zero gates accepted (status is not flipped). Bulk: `POST /assets/bulk-quarantine`
 (`ids[]` ≤500, one result per id, one bad asset never fails the batch).
+
+## Path Monitor (short form)
+
+```
+GET  /path-checks                              # checks + fleet summary (pathChecks:read)
+POST /path-checks/preview-sources  {scope,assetIds}   # dry-run which agent hosts would run it
+POST /path-checks  {name, kind, target, scope|assetIds, ...}   # 201 (pathChecks:write)
+GET  /path-checks/:id/results                  # latest result per host
+GET  /assets/:id/path-check-history?checkId=&range=24h        # one host's series (assets:read)
+GET  /assets/:id/path-check-traceroutes?checkId=&limit=10
+```
+What trips clients up: **`PUT` replaces the whole check** (send every field, not a patch);
+a check has **no threshold** and never changes a host's Up / Down, so alerting is an
+automation on the `path*` metrics, not a field here; the service limits are stricter than the
+request schema — `intervalSec` whole minutes 60–3600, `timeoutMs` **500–30000** and at most
+half the interval — so validate against those; targets are IPv4 only, and loopback,
+link-local, cloud-metadata, multicast and the Polaris server itself are refused with 400;
+409 means a duplicate name or a 51st enabled check. Only hosts running Polaris Agent
+0.21.0+ run checks (`supported: false` in results otherwise).
 
 ## Keeping this plugin current
 
