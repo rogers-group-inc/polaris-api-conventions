@@ -59,7 +59,7 @@ Body: `{ name?, purpose?, status?, vlan?, tags?, convertToManual? }`.
 
 _Gate: subnets:write (own rows) / fullwrite_
 
-`204`; `409` while the network holds active reservations.
+`204`; `409` while the network holds active reservations (the gate's own `interface_ip` reservation does not count). `?force=true` deletes it anyway, reservations included, and is accepted only from an admin-equivalent role (users + roles fullwrite) — `403` otherwise. A forced delete removes Polaris records only; nothing is unpushed from a FortiGate.
 
 ### POST /subnets/:id/refresh
 
