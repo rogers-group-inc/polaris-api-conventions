@@ -13,6 +13,7 @@ _Gate: events:read_
 - `level`, `resourceType` — comma-separated multi-value (levels: `info`, `warning`, `error`; resource types enumerable via `GET /events/resource-types`).
 - `action`, `resourceName`, `actor`, `message` text filters, each with an optional `Op` (`contains` default, `not_contains`, `empty`, `is_not_empty`).
 - `resourceId` exact match; `since` / `until` timestamps (floored by the retention window).
+- `assetId` — every event *about* one asset, whatever it is filed under: the asset's own `resourceType=asset` rows plus its alerts' `notification.*` rows (fired, escalated, cleared). Every returned event carries an `assetId` field (`null` when it is about no single asset).
 - `sortBy` ∈ `timestamp, level, action, resourceType, resourceName, actor, message` + `sortDir`; default newest first. Sorting by `level` orders by severity, not alphabetically.
 
 ```bash
