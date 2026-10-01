@@ -47,7 +47,7 @@ FortiGate DHCP/endpoint sighting history — where the device was last seen on t
 
 _Gate: assets:read_
 
-The device's dependency context: `{ asset, effectiveParents, computedParents, overrideParents, hasOverride, children, childrenTruncated, childCount, haPeer }`. `children` lists infrastructure-type children only, capped at 300 (`childrenTruncated` flags overflow).
+The device's dependency context: `{ asset, effectiveParents, computedParents, overrideParents, hasOverride, children, childrenTruncated, childCount, haPeer }`. `children` lists infrastructure-type children only, capped at 300 (`childrenTruncated` flags overflow). Every node — `asset`, each `effectiveParents[].parent`, `haPeer`, each child and grandchild — carries `activeAlert`: `{ severity, count, unacknowledged }` for its uncleared alerts (worst severity first), or `null` when nothing is firing.
 
 Creating a device and putting it under monitoring is **two calls**: `POST /assets` carries inventory fields only, and the monitoring switch plus its credential wiring live on `PUT /assets/:id`. Credentials themselves are *not* created over the API in the normal flow — an operator saves them once under Server Settings → Credentials and the integration references the stored row by id.
 
