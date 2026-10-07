@@ -13,6 +13,7 @@ Every token is bound to a **Role** at creation and can do exactly what that role
 
 - Bearer requests are exempt from CSRF checks — no CSRF token or cookie is needed.
 - A missing, revoked, expired, or malformed token gets the same `401` as no token at all; the API does not distinguish.
+- A token may be limited to **trusted hosts** — a list of IP addresses and CIDRs set when it is created. A valid token sent from any other address gets a `403` whose message names the source address Polaris saw (behind a reverse proxy, check that it forwards the client address). A token with no list is accepted from anywhere.
 - A request the token's role does not permit gets a `403` — except on the handful of aggregate endpoints documented as *filter-don't-403*, which return the sections the role can read and leave the rest empty.
 - There is no token-introspection endpoint: `GET /auth/me` answers `{"authenticated": false}` for bearer callers. To smoke-test a token, call a cheap endpoint its role can read (for example `GET /assets?limit=1`) and check for `200`.
 - Writes made with a token are attributed in the Polaris audit log as `api:`.
