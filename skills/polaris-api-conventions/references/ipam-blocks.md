@@ -8,7 +8,7 @@ Top-level CIDR namespaces. Reads: `ipBlocks:read`; writes: `ipBlocks:write`.
 
 _Gate: ipBlocks:read_
 
-All blocks as a JSON array (no paging), each with a subnet count. Filters: `ipVersion` (`v4`/`v6`), `tag`.
+All blocks as a JSON array (no paging), each with a subnet count (`_count.subnets`) and `utilizationPercent` — the share (0–100) of the block's address space carved into non-deprecated networks. Filters: `ipVersion` (`v4`/`v6`), `tag`.
 
 ### GET /blocks/:id
 
