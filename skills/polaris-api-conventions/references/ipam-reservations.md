@@ -14,7 +14,7 @@ _Gate: reservations:read_
 
 _Gate: reservations:write_
 
-Body: `{ subnetId, ipAddress?, hostname, owner?, projectRef?, expiresAt?, notes?, macAddress? }`. Omit `ipAddress` to reserve the whole subnet. `201` with the reservation.
+Body: `{ subnetId, ipAddress?, hostname, owner?, projectRef?, expiresAt?, notes?, macAddress? }`. Omit `ipAddress` to reserve the whole subnet. `201` with the reservation. An all-zero `macAddress` (`00:00:00:00:00:00`, any separators) is a `400`: it names no device. Omit it instead.
 
 Collision semantics: an existing *active* row at the same address is a `409` — unless it is merely observed presence (`dhcp_lease`, `dns_resolved`, or a lease-backed infra row), which the create supersedes in place. Device-owned rows (`vip`, `interface_ip`) and authoritative types always `409`. A deprecated subnet refuses new reservations.
 
@@ -37,7 +37,7 @@ Reserve the next free IPv4 address in a subnet: same body minus `ipAddress`. Dry
 
 _Gate: reservations:write (own rows) / fullwrite_
 
-Body: `{ hostname?, owner?, projectRef?, expiresAt?, notes?, macAddress? }` (`macAddress: ""` clears it). `409` for non-active rows and for device-owned rows: a FortiGate VIP or interface address is configured on the device itself and cannot be edited or released from Polaris.
+Body: `{ hostname?, owner?, projectRef?, expiresAt?, notes?, macAddress? }` (`macAddress: ""` clears it; changing it to the all-zero MAC is a `400`, while sending back a zero the row already holds is accepted). `409` for non-active rows and for device-owned rows: a FortiGate VIP or interface address is configured on the device itself and cannot be edited or released from Polaris.
 
 ### DELETE /reservations/:id
 
