@@ -109,6 +109,26 @@ _Gate: assets:write_
 
 `204`. `409` for a quarantined device — release it first.
 
+### PUT /assets/:id/primary-address
+
+_Gate: assets:write_
+
+Pin the address the device is monitored on: `{ mac, ip }` → `{ assetId, mac, ip }`. The pair must be one of the device's own addresses — an entry in `associatedIps` on `GET /assets/:id`, each of which names its `mac`, the gate that reported it (`device`) and `medium`. `ipAddress` becomes the pinned IP and discovery stops changing it; the one exception is a renumber — when the pinned IP has not been seen for 24 hours and the same MAC now has exactly one recently seen address, the pin moves to it. Pinning replaces an IP typed through `PUT /assets/:id`, and typing or clearing the IP there, or `ipRevertToDiscovered`, releases the pin. The device's identity `macAddress` is not changed.
+
+- `409` — the pair is not on the device's address list (type an address that is not there through `PUT /assets/:id` instead).
+- `409` — a FortiGate, FortiSwitch or FortiAP managed by a Fortinet integration; it is monitored on its management IP.
+- `400` — `mac` is not a MAC address.
+
+```bash
+curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: application/json"   -d '{"mac":"AA:BB:CC:DD:EE:FF","ip":"10.20.30.4"}'   "$POLARIS_URL/api/v1/assets/$ASSET_ID/primary-address"
+```
+
+### DELETE /assets/:id/primary-address
+
+_Gate: assets:write_
+
+Release the pin → `{ ipAddress }`. The address goes back to what discovery reports (a device no source reports keeps the one it has). A device with no pin is left as it is.
+
 ### GET /credentials
 
 _Gate: credentials:read_
