@@ -31,6 +31,8 @@ _Gate: assets:read_
 
 One device — the full asset record at the top level (not wrapped), including monitoring state, discovered attributes, associated IPs and MAC addresses. `404` when absent.
 
+`addressConfidence` scores every address on the device, keyed by IP: `{ "10.20.30.4": { score, evidenceScore, band, evidenceBand, parts, penalties } }`. `score` is 0–100 and includes an operator's pin or typed address; `evidenceScore` is the network evidence alone. `band` is `high` (80 and up), `medium` (50), `low` (20) or `very-low`. Each entry in `parts` is one kind of evidence — `{ kind, label, device, seenAt, hours, value }`: the device's own interface table, a gate seeing it online, a held DHCP reservation or lease, an ARP entry, a vCenter guest IP, an Azure Arc profile, a Generic API feed, or how long Polaris's own polling has answered on it — and each entry in `penalties` is `{ kind, factor, detail }`. The score is informational: nothing alerts or decides on it. The list (`GET /assets`) carries the compact form, `{ score, band }` per address.
+
 ### GET /assets/:id/sources
 
 _Gate: assets:read_
@@ -128,6 +130,19 @@ curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: applic
 _Gate: assets:write_
 
 Release the pin → `{ ipAddress }`. The address goes back to what discovery reports (a device no source reports keeps the one it has). A device with no pin is left as it is.
+
+### POST /assets/:id/address-check
+
+_Gate: assets:write_
+
+Score an address before pinning it or typing it in: `{ ip, probe? }` → `{ ip, evidenceScore, evidenceBand, score, band, parts, penalties, warn, warnBelow, probe }`. The fields are those of `addressConfidence` on `GET /assets/:id`; an address the device has never been seen on scores 0. `warn` is true when `evidenceScore` is below `warnBelow` (50). With `probe: true` the server sends the address one ping (2-second timeout) and `probe` is `{ answered, error }`, otherwise `null` — a reply shows something answers there, not that it is this device, so it is reported beside the score rather than counted in it. Only a check: nothing is written, and `PUT /assets/:id` and `PUT /assets/:id/primary-address` never refuse a low score.
+
+- `400` — `ip` is not an IP address.
+- `404` — no such device.
+
+```bash
+curl -X POST -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: application/json"   -d '{"ip":"10.20.30.4","probe":true}'   "$POLARIS_URL/api/v1/assets/$ASSET_ID/address-check"
+```
 
 ### GET /credentials
 
