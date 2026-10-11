@@ -31,7 +31,7 @@ _Gate: assets:read_
 
 One device — the full asset record at the top level (not wrapped), including monitoring state, discovered attributes, associated IPs and MAC addresses. `404` when absent.
 
-`addressConfidence` scores every address on the device, keyed by IP: `{ "10.20.30.4": { score, evidenceScore, band, evidenceBand, parts, penalties } }`. `score` is 0–100 and includes an operator's pin or typed address; `evidenceScore` is the network evidence alone. `band` is `high` (80 and up), `medium` (50), `low` (20) or `very-low`. Each entry in `parts` is one kind of evidence — `{ kind, label, device, seenAt, hours, value }`: the device's own interface table, a gate seeing it online, a held DHCP reservation or lease, an ARP entry, a vCenter guest IP, an Azure Arc profile, a Generic API feed, or how long Polaris's own polling has answered on it — and each entry in `penalties` is `{ kind, factor, detail }`. The score is informational: nothing alerts or decides on it. The list (`GET /assets`) carries the compact form, `{ score, band }` per address.
+`addressConfidence` scores every address on the device, keyed by IP: `{ "10.20.30.4": { score, evidenceScore, discoveryScore, band, evidenceBand, parts, penalties } }`. `score` is 0–100 and includes an operator's pin or typed address; `evidenceScore` is the network evidence alone; `discoveryScore` (0–100) is discovery's evidence alone — no operator, no polling — and is what the automatic pin release compares. `band` is `high` (80 and up), `medium` (50), `low` (20) or `very-low`. Each entry in `parts` is one kind of evidence — `{ kind, label, device, seenAt, hours, value }`: the device's own interface table, a gate seeing it online, a held DHCP reservation or lease, an ARP entry, the management IP a FortiGate, FortiSwitch or FortiAP record names, a vCenter guest or host IP, a Proxmox, Unraid or TrueNAS host, VM or container record, an Azure Arc profile, a FortiGate endpoint record, a Generic API feed, or how long Polaris's own polling has answered on it — and each entry in `penalties` is `{ kind, factor, detail }`. Nothing alerts on the score; it only picks the address an unpinned device moves to and when a pin is released. The list (`GET /assets`) carries the compact form, `{ score, band }` per address.
 
 ### GET /assets/:id/sources
 
@@ -129,7 +129,7 @@ curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: applic
 
 _Gate: assets:write_
 
-Release the pin → `{ ipAddress }`. The address goes back to what discovery reports (a device no source reports keeps the one it has). A device with no pin is left as it is.
+Release the pin → `{ ipAddress }`. The device moves to the address on its own list (`associatedIps`) with the highest `evidenceScore` — network evidence including polling, no operator weight; a tie keeps the current address. Only when the list is empty does the address go back to what discovery reports (a device no source reports keeps the one it has). A device with no pin is left as it is.
 
 ### POST /assets/:id/address-check
 
