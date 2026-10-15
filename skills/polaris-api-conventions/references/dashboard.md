@@ -29,4 +29,4 @@ _Gate: per-section: ipBlocks/reservations/assets read_
 
 _Gate: assets:read_
 
-`{ assetTypes, regions, fortigates }` — the values the noc-summary filters accept. `assetTypes` is `{ name, label }` entries: every built-in type followed by every operator-added type the asset-type registry carries (plus any custom name still worn by a live asset whose registry row is gone), registry-labelled. Empty arrays (not 403) without `assets:read`.
+`{ assetTypes, regions, fortigates, tags }` — the values the dashboard widget filters accept. `assetTypes` is `{ name, label }` entries: every built-in type followed by every operator-added type the asset-type registry carries (plus any custom name still worn by a live asset whose registry row is gone), registry-labelled. `tags` is the distinct asset tags across the live fleet, `region:` tags excluded (they are `regions`). Empty arrays (not 403) without `assets:read`.
