@@ -1,11 +1,11 @@
 {
   "name": "polaris-api-conventions",
   "displayName": "Polaris API conventions",
-  "version": "0.4.17",
+  "version": "0.4.18",
   "description": "Client guide for the Polaris IP-management and monitoring REST API (/api/v1): bearer tokens bound to roles, error and status conventions, filter-don't-403 NOC feeds, search scopes, device onboarding (create a device, wire its monitoring credentials, enable monitoring), IPAM blocks/networks/reservations, Path Monitor path checks, the SIEM quarantine flow and the events audit tail, generated from the Polaris /api developer page.",
   "author": {
     "name": "Rogers Group — David Moore"
   },
   "license": "AGPL-3.0-only",
-  "sourceApiHtmlSha256": "b49881f0d53286306f19e2be369cb6baf08a1bfb9600fa4dea2359e83767426c"
+  "sourceApiHtmlSha256": "123f115d353d92d27757741ba6a1297de4c60fb2b2d2679cd98fc89531e62c71"
 }
