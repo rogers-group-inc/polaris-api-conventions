@@ -120,6 +120,7 @@ Pin the address the device is monitored on: `{ mac, ip }` → `{ assetId, mac, i
 - `409` — the pair is not on the device's address list (type an address that is not there through `PUT /assets/:id` instead).
 - `409` — a FortiGate, FortiSwitch or FortiAP managed by a Fortinet integration; it is monitored on its management IP.
 - `400` — `mac` is not a MAC address.
+- `400` — `ip` is an IPv6 address; use `PUT /assets/:id/primary-ipv6`.
 
 ```bash
 curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: application/json"   -d '{"mac":"AA:BB:CC:DD:EE:FF","ip":"10.20.30.4"}'   "$POLARIS_URL/api/v1/assets/$ASSET_ID/primary-address"
@@ -130,6 +131,25 @@ curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: applic
 _Gate: assets:write_
 
 Release the pin → `{ ipAddress }`. The device moves to the address on its own list (`associatedIps`) with the highest `evidenceScore` — network evidence including polling, no operator weight; a tie keeps the current address. Only when the list is empty does the address go back to what discovery reports (a device no source reports keeps the one it has). A device with no pin is left as it is.
+
+### PUT /assets/:id/primary-ipv6
+
+_Gate: assets:write_
+
+Pin the device's primary IPv6 address: `{ ip }` → `{ assetId, ipv6Address }`. The primary IPv6 is `ipv6Address` on `GET /assets/:id`; it is shown beside `ipAddress` and never replaces it. A device with no `ipAddress` is monitored on it. Without a pin Polaris picks it from the device's IPv6 entries in `associatedIps`; a pinned one is left alone. The address is stored in canonical form.
+
+- `409` — IPv6 is off for this Polaris install.
+- `400` — `ip` is not an IPv6 address, or is loopback, link-local or multicast.
+
+```bash
+curl -X PUT -H "Authorization: Bearer $POLARIS_TOKEN"   -H "Content-Type: application/json"   -d '{"ip":"2001:db8::4"}'   "$POLARIS_URL/api/v1/assets/$ASSET_ID/primary-ipv6"
+```
+
+### DELETE /assets/:id/primary-ipv6
+
+_Gate: assets:write_
+
+Release the pin → `{ ipv6Address }`, the automatic choice made straight away (`null` when the device has no IPv6 address, or IPv6 is off). A device with no pin is left as it is.
 
 ### POST /assets/:id/address-check
 
