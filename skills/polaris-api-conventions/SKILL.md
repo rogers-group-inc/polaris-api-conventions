@@ -1,6 +1,6 @@
 ---
 name: polaris-api-conventions
-description: "Client guide for the Polaris IP-management and monitoring REST API (/api/v1): bearer tokens bound to roles, error envelope and status conventions, filter-don't-403 dashboard/NOC feeds, search scopes, IPAM blocks/networks/reservations, the SIEM quarantine flow, Path Monitor path checks (agent-run HTTP / HTTPS / TCP / ICMP reachability checks, their per-host results, latency history and traceroutes), and the events audit tail, with curl examples. Load when a project calls a Polaris server, needs a POLARIS_TOKEN, quarantines a device from a SIEM/EDR, builds a NOC wallboard or inventory sync, creates or reads path checks (is a service reachable from each site), or asks what a Polaris endpoint returns."
+description: "Client guide for the Polaris IP-management and monitoring REST API (/api/v1): bearer tokens bound to roles, error envelope and status conventions, filter-don't-403 dashboard/NOC feeds, search scopes, IPAM blocks/networks/reservations, the SIEM quarantine flow, Path Monitor path checks (agent-run HTTP / HTTPS / TCP / ICMP reachability checks, their per-host results, latency history and traceroutes), automations (rule CRUD, the /schema vocabulary, preview / dry run), the MIB Database (upload, structure, walk) and manufacturer profiles (metric rows, overrides, custom widgets and state probes, export / import), and the events audit tail, with curl examples. Load when a project calls a Polaris server, needs a POLARIS_TOKEN, quarantines a device from a SIEM/EDR, builds a NOC wallboard or inventory sync, creates or reads path checks (is a service reachable from each site), creates or edits automations over the API, uploads MIBs or builds a manufacturer profile programmatically, or asks what a Polaris endpoint returns."
 ---
 
 # Polaris API — client conventions
@@ -69,6 +69,9 @@ block with active reservations), 429 (back off — machine-facing limiters are g
 | IPAM: networks (subnets), next-available, bulk allocate, archive, exclusions | [references/ipam-subnets.md](references/ipam-subnets.md) |
 | IPAM: reservations, next-available, push queue, collision semantics | [references/ipam-reservations.md](references/ipam-reservations.md) |
 | Path Monitor: agent-run path checks, their per-host results, history and traceroutes | [references/path-monitor.md](references/path-monitor.md) |
+| automations: rule CRUD, the `/schema` vocabulary, preview / dry run, masked `api_call` headers, removal impact | [references/automations.md](references/automations.md) |
+| the MIB Database: upload, structure (symbols, OIDs, enums), MIB-aware walk, the bundled standard MIBs | [references/mib-database.md](references/mib-database.md) |
+| manufacturer profiles: metric rows, overrides, custom widgets, state probes, widget switches, export / import, aliases | [references/manufacturer-profiles.md](references/manufacturer-profiles.md) |
 | the audit tail and how to poll it incrementally | [references/events.md](references/events.md) |
 | a minimal client to start from | [examples/polaris-client.ts](examples/polaris-client.ts), [examples/polaris-client.ps1](examples/polaris-client.ps1) |
 
